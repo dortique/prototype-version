@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ProtoVersion
 {
@@ -12,17 +13,23 @@ namespace ProtoVersion
                 RunConsoleApp(engine);
             else
             {
-                var agr = engine.CreateAgreement(new[] {1, 2, 3, 4});
+
+                //a0: (x,y) = (1,2) valeur=0
+                var agr = engine.CreateAgreement(new[] {1, 2});
                 Console.WriteLine($"New Agreeemnt: {agr}");
                 Console.WriteLine();
 
+                //e1: x = 2 (valeur=20)
+                //a1: (x,y) = (2,2) valuer=20
                 var evt = engine.ChangeAgreement(agr.Id, 0, 2, 20);
                 Console.WriteLine($"Agreement changed: {evt}");
                 agr = evt.Apply();
                 Console.WriteLine($"Agreement: {agr}");
-                if (agr.Values[0] != 2) ExitOnKey("FAIL!");
+                if (agr.Values[0] != 2 || agr.Values[1] != 2) ExitOnKey("FAIL!");
                 Console.WriteLine();
 
+                //e2: y = 3 (valeur=20)
+                //a2: (x,y) = (2,3) valuer=20
                 evt = engine.ChangeAgreement(agr.Id, 1, 3, 20);
                 Console.WriteLine($"Agreement changed: {evt}");
                 agr = evt.Apply();
@@ -30,6 +37,8 @@ namespace ProtoVersion
                 if (agr.Values[0] != 2 || agr.Values[1] != 3) ExitOnKey("FAIL!");
                 Console.WriteLine();
 
+                //e3: y = 8 (valeur=10)
+                //a3: (x,y) = (1,8) valuer=10
                 evt = engine.ChangeAgreement(agr.Id, 1, 8, 10);
                 Console.WriteLine($"Agreement changed: {evt}");
                 agr = evt.Apply();
@@ -37,13 +46,24 @@ namespace ProtoVersion
                 if (agr.Values[0] != 1 || agr.Values[1] != 8) ExitOnKey("FAIL!");
                 Console.WriteLine();
 
+                //a?: (x,y) = (2,3) valuer=20
+                agr = Engine.Agreements.First().Get(20);
+                Console.WriteLine($"Agreement: {agr}");
+                if (agr.Values[0] != 2 || agr.Values[1] != 3) ExitOnKey("FAIL!");
+                Console.WriteLine();
 
-                //agr = engine.ChangeAgreement(agr.Id, 0, 8, 20);
-                //Console.WriteLine($"Agreeemnt changed: {agr}");
-                //agr = engine.ChangeAgreement(agr.Id, 2, 6, 20);
-                //Console.WriteLine($"Agreeemnt changed: {agr}");
-                //agr = engine.ChangeAgreement(agr.Id, 0, 2, 15);
-                //Console.WriteLine($"Agreeemnt changed: {agr}");
+                //e4: x = 6 (valeur=20)
+                //a4: (x,y) = (6,3) valuer=20
+                evt = engine.ChangeAgreement(agr.Id, 0, 6, 30);
+                Console.WriteLine($"Agreement changed: {evt}");
+                agr = evt.Apply();
+                Console.WriteLine($"Agreement: {agr}");
+                if (agr.Values[0] != 6 || agr.Values[1] != 3) ExitOnKey("FAIL!");
+                Console.WriteLine();
+
+
+
+
                 ExitOnKey("Press any key to exit");
             }
         }
