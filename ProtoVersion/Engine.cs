@@ -52,7 +52,7 @@ namespace ProtoVersion
             }
             catch (Exception e)
             {
-                return string.Join(Environment.NewLine, $"Error in command: {line} ({e.Message})", DisplayCommands());
+                return string.Join(Environment.NewLine, $"Error in command (idiot): {line} ({e.Message})", DisplayCommands());
             }
         }
 
