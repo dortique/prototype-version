@@ -40,7 +40,7 @@ namespace ProtoVersion
             }
             return new Agreement(values, valeur)
             {
-                Id = Id
+                Id = Id,
             };
 
         }

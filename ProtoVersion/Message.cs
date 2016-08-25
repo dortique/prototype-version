@@ -10,5 +10,11 @@ namespace ProtoVersion
     public class Message
     {
         public int EventId { get; set; }
+
+        public Message(int eventid)
+        {
+            EventId = eventid;
+        }
+
     }
 }

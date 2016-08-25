@@ -12,14 +12,17 @@ namespace ProtoVersion
         public int AgreementId { get; private set; }
         public int[] Values { get; }
 
-        public int AgreementIndependentValue { get; set; }
-        public int CalculatedValue => Values.Sum();
+        public int Valeur { get;  }
 
-        public CoverCollection(int agreementId, int[] values, int agreementIndependentValue)
+        public int A { get; set; }
+        public int CalculatedValue => Values.Sum()+A;
+
+        public CoverCollection(int agreementId, int[] values, int a, int valeur)
         {
             Values = values;
             AgreementId = agreementId;
-            AgreementIndependentValue = agreementIndependentValue;
+            A = a;
+            Valeur = valeur;
             Id = Engine.CoverCollections.Count + 1;
         }
 
@@ -30,7 +33,7 @@ namespace ProtoVersion
 
         public string Get(int valeurDate)
         {
-            return $"CC{Id}[{string.Join("][", Values)}][cal:{CalculatedValue}] [agrId:{AgreementId}]";
+            return $"CC{Id}[{string.Join("][", Values)}] [A:{A}] [cal:{CalculatedValue}] [agrId:{AgreementId}]";
         }
     }
 }
