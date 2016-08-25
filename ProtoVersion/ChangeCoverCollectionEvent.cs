@@ -12,17 +12,15 @@ namespace ProtoVersion
         public int ValeurDate { get; set; }
         public DateTime RegisterDate { get; set; }
         public int CoverCollectionId { get; set; }
-        public string Key { get; set; }
-        public int Value { get; set; }
-        public override string ToString() => $"{GetType().Name}({Id})[{CoverCollectionId}:key {Key}:val {Value}:valeur {ValeurDate}] (regdate = {RegisterDate})";
+        public Dictionary<string, int> Changes { get; set; }
+        public override string ToString() => $"{GetType().Name}({Id})[{CoverCollectionId}]{string.Join(",", Changes.Select(x => $"({x.Key} => {x.Value})"))}(valeur = {ValeurDate}) (regdate = {RegisterDate})";
 
-        public ChangeCoverCollectionEvent(int coverCollectionId, string key, int value, int valeur, int id)
+        public ChangeCoverCollectionEvent(int coverCollectionId, Dictionary<string, int> changes, int valeur)
         {
             CoverCollectionId = coverCollectionId;
-            Id = id;
+            Id = Engine.CoverCollectionEvents.Count + 1;
             ValeurDate = valeur;
-            Key = key;
-            Value = value;
+            Changes = changes;
             RegisterDate = DateTime.Now;
         }
 
@@ -32,4 +30,5 @@ namespace ProtoVersion
         }
 
     }
+
 }

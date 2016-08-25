@@ -13,7 +13,7 @@ namespace ProtoVersion
         public DateTime RegisterDate { get; set; }
         public int AgreementId { get; set; }
         public Dictionary<string, int> Changes { get; set; }
-        public override string ToString() => $"CAE({Id})[agrId:{AgreementId}]{Changes.Select(x => $"[{x.Key}={x.Value}]")}[valeur:{ValeurDate}]";
+        public override string ToString() => $"CAE({Id})[agrId:{AgreementId}]{string.Join(",", Changes.Select(x => $"({x.Key} => {x.Value})"))}[valeur:{ValeurDate}]";
 
         public ChangeAgreementEvent(int agreementId, Dictionary<string, int> changes, int valeur)
         {

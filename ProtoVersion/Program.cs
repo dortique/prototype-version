@@ -7,104 +7,126 @@ namespace ProtoVersion
 {
     class Program
     {
+        private static bool write = true;
         static void Main(string[] args)
         {
             var engine = new Engine();
             Console.WindowWidth = 200;
             Console.WindowHeight = 75;
             if (args.Length > 0)
-                RunConsoleApp(engine);
+                RunConsoleApp();
             else
             {
                 //a0: (x,y) = (1,2) valeur=0
-                var agr = engine.CreateAgreement(new Dictionary<string, int> { { "x", 1 }, { "y", 2 } });
-                Console.WriteLine($"New Agreeemnt: {agr}");
-                Console.WriteLine();
-
-                //cc1: (x,y) = (1,2) a = 12 valeur=0
-                var cc = engine.CreateCoverCollection(agr.Id, new Dictionary<string, int> {  { "a", 12 } }, 0);
-                Console.WriteLine($"new CoverCollections: {cc}");
-                if (!CheckCoverCollection(cc, 1,2,12,0)) ExitOnKey("FAIL!");
-                //cc2: (x,y) = (1,2) a = 23 valeur=0
-                cc = engine.CreateCoverCollection(agr.Id, new Dictionary<string, int> { { "a", 23 } }, 0);
-                Console.WriteLine($"new CoverCollections: {cc}");
-                if (!CheckCoverCollection(cc, 1, 2, 23,0)) ExitOnKey("FAIL!");
-                Console.WriteLine();
-
-                //e1: x = 2 (valeur=20)
-                //a1: (x,y) = (2,2) valuer=20
-                var evt = engine.CreateChangeAgreementEvent(agr.Id, new Dictionary<string, int> { { "x", 2 } }, 20);
-                Console.WriteLine($"Agreement changed: {evt}");
-                agr = evt.Apply();
-                Console.WriteLine($"Agreement: {agr}");
-                if (CheckAgreement(agr,2,2, 20)) ExitOnKey("FAIL!");
-                Console.WriteLine();
-
-                //e2: y = 3 (valeur=20)
-                //a2: (x,y) = (2,3) valuer=20
-                evt = engine.CreateChangeAgreementEvent(agr.Id, new Dictionary<string, int> { { "y", 3 } }, 20);
-                Console.WriteLine($"Agreement changed: {evt}");
-                agr = evt.Apply();
-                Console.WriteLine($"Agreement: {agr}");
-                if (CheckAgreement(agr, 2, 3, 20)) ExitOnKey("FAIL!");
-                Console.WriteLine();
-
-                //cc3: (x,y) = (1,2) a = 7 valeur=0
-                cc = engine.CreateCoverCollection(agr.Id, new Dictionary<string, int> { { "a", 7 } }, 0);
-                Console.WriteLine($"new CoverCollections: {cc}");
-                if (!CheckCoverCollection(cc, 1, 2, 7,0)) ExitOnKey("FAIL!");
-                //cc4: (x,y) = (2,3) a = 11 valeur=20
-                cc = engine.CreateCoverCollection(agr.Id, new Dictionary<string, int> { { "a", 11 } }, 20);
-                Console.WriteLine($"new CoverCollections: {cc}");
-                if (!CheckCoverCollection(cc, 2, 3, 11,20)) ExitOnKey("FAIL!");
-                Console.WriteLine();
-
-                var ccs = engine.GetCoverCollections(0);
-                if (ccs.Count > 3) ExitOnKey($"FAIL! Too many covercollections (expected 3, actual count is {ccs.Count}");
-
-                //e3: y = 8 (valeur=10)
-                //a3: (x,y) = (1,8) valuer=10
-                evt = engine.CreateChangeAgreementEvent(agr.Id, new Dictionary<string, int> { { "y", 8 } }, 10);
-                Console.WriteLine($"Agreement changed: {evt}");
-                agr = evt.Apply();
-                Console.WriteLine($"Agreement: {agr}");
-                if (CheckAgreement(agr, 1, 8, 10)) ExitOnKey("FAIL!");
-                Console.WriteLine();
-
-                //a?: (x,y) = (2,3) valuer=20
-                agr = Engine.Agreements.First().Get(20);
-                Console.WriteLine($"Agreement: {agr}");
-                if (agr.Values["x"] != 2 || agr.Values["y"] != 3) ExitOnKey("FAIL!");
-                Console.WriteLine();
-
-                //e4: x = 6 (valeur=20)
-                //a4: (x,y) = (6,3) valuer=20
-                evt = engine.CreateChangeAgreementEvent(agr.Id, new Dictionary<string, int> { { "x", 6 } }, 30);
-                Console.WriteLine($"Agreement changed: {evt}");
-                agr = evt.Apply();
-                Console.WriteLine($"Agreement: {agr}");
-                if (CheckAgreement(agr, 6, 3, 30)) ExitOnKey("FAIL!");
-                Console.WriteLine();
-
-                agr = Engine.Agreements.First().Get(15);
-                Console.WriteLine($"Agrement.Get(15): {agr}");
-                if (CheckAgreement(agr, 1, 8, 10)) ExitOnKey("FAIL!");
-                agr = Engine.Agreements.First().Get(10);
-                Console.WriteLine($"Agrement.Get(10): {agr}");
-                if (CheckAgreement(agr, 1, 8, 10)) ExitOnKey("FAIL!");
-                agr = Engine.Agreements.First().Get(5);
-                Console.WriteLine($"Agrement.Get(5): {agr}");
-                if (CheckAgreement(agr, 1, 2, 0)) ExitOnKey("FAIL!");
-
-                cc = Engine.CoverCollections.First().Get(0);
-                Console.WriteLine($"CoverCollections[0].Get(0): {cc}");
-                if (!CheckCoverCollection(cc, 1, 2, 12, 0)) ExitOnKey("FAIL!");
-
+                DoStuff(engine);
 
                 Console.WriteLine("all is good");
                 //RunConsoleApp(engine);
                 ExitOnKey("Press any key to exit");
             }
+        }
+
+        private static void DoStuff(Engine engine)
+        {
+            var agr = engine.CreateAgreement(new Dictionary<string, int> {{"x", 1}, {"y", 2}});
+            WriteMaybe($"New Agreeemnt: {agr}");
+            WriteMaybe();
+
+            //cc1: (x,y) = (1,2) a = 12 valeur=0
+            var cc = engine.CreateCoverCollection(agr.Id, new Dictionary<string, int> {{"a", 12}}, 0);
+            WriteMaybe($"new CoverCollections: {cc}");
+            if (!CheckCoverCollection(cc, 1, 2, 12, 0)) FailAndExitOnKey("FAIL!");
+            //cc2: (x,y) = (1,2) a = 23 valeur=0
+            cc = engine.CreateCoverCollection(agr.Id, new Dictionary<string, int> {{"a", 23}}, 0);
+            WriteMaybe($"new CoverCollections: {cc}");
+            if (!CheckCoverCollection(cc, 1, 2, 23, 0)) FailAndExitOnKey("FAIL!");
+            WriteMaybe();
+
+            //e1: x = 2 (valeur=20)
+            //a1: (x,y) = (2,2) valuer=20
+            var evt = engine.CreateChangeAgreementEvent(agr.Id, new Dictionary<string, int> {{"x", 2}}, 20);
+            WriteMaybe($"Agreement changed: {evt}");
+            agr = evt.Apply();
+            WriteMaybe($"Agreement: {agr}");
+            if (CheckAgreement(agr, 2, 2, 20)) FailAndExitOnKey("FAIL!");
+            WriteMaybe();
+
+            //e2: y = 3 (valeur=20)
+            //a2: (x,y) = (2,3) valuer=20
+            evt = engine.CreateChangeAgreementEvent(agr.Id, new Dictionary<string, int> {{"y", 3}}, 20);
+            WriteMaybe($"Agreement changed: {evt}");
+            agr = evt.Apply();
+            WriteMaybe($"Agreement: {agr}");
+            if (CheckAgreement(agr, 2, 3, 20)) FailAndExitOnKey("FAIL!");
+            WriteMaybe();
+
+            //cc3: (x,y) = (1,2) a = 7 valeur=0
+            cc = engine.CreateCoverCollection(agr.Id, new Dictionary<string, int> {{"a", 7}}, 0);
+            WriteMaybe($"new CoverCollections: {cc}");
+            if (!CheckCoverCollection(cc, 1, 2, 7, 0)) ExitOnKey("FAIL!");
+            //cc4: (x,y) = (2,3) a = 11 valeur=20
+            cc = engine.CreateCoverCollection(agr.Id, new Dictionary<string, int> {{"a", 11}}, 20);
+            WriteMaybe($"new CoverCollections: {cc}");
+            if (!CheckCoverCollection(cc, 2, 3, 11, 20)) ExitOnKey("FAIL!");
+            WriteMaybe();
+
+            var ccs = engine.GetCoverCollections(0);
+            if (ccs.Count > 3) ExitOnKey($"FAIL! Too many covercollections (expected 3, actual count is {ccs.Count}");
+
+            //e3: y = 8 (valeur=10)
+            //a3: (x,y) = (1,8) valuer=10
+            evt = engine.CreateChangeAgreementEvent(agr.Id, new Dictionary<string, int> {{"y", 8}}, 10);
+            WriteMaybe($"Agreement changed: {evt}");
+            agr = evt.Apply();
+            WriteMaybe($"Agreement: {agr}");
+            if (CheckAgreement(agr, 1, 8, 10)) ExitOnKey("FAIL!");
+            WriteMaybe();
+
+            //a?: (x,y) = (2,3) valuer=20
+            agr = Engine.Agreements.First().Get(20);
+            WriteMaybe($"Agreement: {agr}");
+            if (agr.Values["x"] != 2 || agr.Values["y"] != 3) FailAndExitOnKey("FAIL!");
+            WriteMaybe();
+
+            //e4: x = 6 (valeur=20)
+            //a4: (x,y) = (6,3) valuer=20
+            evt = engine.CreateChangeAgreementEvent(agr.Id, new Dictionary<string, int> {{"x", 6}}, 30);
+            WriteMaybe($"Agreement changed: {evt}");
+            agr = evt.Apply();
+            WriteMaybe($"Agreement: {agr}");
+            if (CheckAgreement(agr, 6, 3, 30)) FailAndExitOnKey("FAIL!");
+            WriteMaybe();
+
+            agr = Engine.Agreements.First().Get(15);
+            WriteMaybe($"Agrement.Get(15): {agr}");
+            if (CheckAgreement(agr, 1, 8, 10)) FailAndExitOnKey("FAIL!");
+            agr = Engine.Agreements.First().Get(10);
+            WriteMaybe($"Agrement.Get(10): {agr}");
+            if (CheckAgreement(agr, 1, 8, 10)) FailAndExitOnKey("FAIL!");
+            agr = Engine.Agreements.First().Get(5);
+            WriteMaybe($"Agrement.Get(5): {agr}");
+            if (CheckAgreement(agr, 1, 2, 0)) FailAndExitOnKey("FAIL!");
+            WriteMaybe();
+            cc = Engine.CoverCollections.First().Get(0);
+            WriteMaybe($"CoverCollections[0].Get(0): {cc}");
+            if (!CheckCoverCollection(cc, 1, 2, 12, 0)) FailAndExitOnKey("FAIL!");
+
+            var ccevt = engine.CreateChangeCoverCollectionEvent(1, new Dictionary<string, int> {{"x", 19}}, 5);
+            WriteMaybe($"CoverCollection changed: {ccevt}");
+            cc = Engine.CoverCollections.First().Get(5);
+            WriteMaybe($"CoverCollections[0].Get(5): {cc}");
+            if (!CheckCoverCollection(cc, 19, 2, 12, 5)) FailAndExitOnKey("FAIL!");
+            WriteMaybe();
+
+            cc = Engine.CoverCollections.First().Get(10);
+            WriteMaybe($"CoverCollections[0].Get(10): {cc}");
+            if (!CheckCoverCollection(cc, 19, 8, 12, 10)) FailAndExitOnKey("FAIL!");
+            WriteMaybe();
+        }
+
+        private static void WriteMaybe(string info = "")
+        {
+            if (write) Console.WriteLine(info);
         }
 
         private static bool CheckAgreement(Agreement agr, int x, int y, int valeur)
@@ -124,7 +146,21 @@ namespace ProtoVersion
             Process.GetCurrentProcess().Kill();
         }
 
-        private static void RunConsoleApp(Engine engine)
+        private static void FailAndExitOnKey(string msg)
+        {
+            Console.WriteLine(msg);
+            if (!write)
+            {
+                write = true;
+                Engine.ClearAll();
+                DoStuff(new Engine());
+            }
+
+            Console.ReadKey();
+            Process.GetCurrentProcess().Kill();
+        }
+
+        private static void RunConsoleApp()
         {
             Console.WriteLine(DisplayCommands());
 

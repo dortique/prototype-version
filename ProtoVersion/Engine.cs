@@ -1,12 +1,5 @@
-﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Data;
-using System.Dynamic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProtoVersion
 {
@@ -55,7 +48,16 @@ namespace ProtoVersion
             return ce;
         }
 
-
+        public ChangeCoverCollectionEvent CreateChangeCoverCollectionEvent(int ccId, Dictionary<string, int> changes, int valeur)
+        {
+            if (!CoverCollections.Any(x => x.Id.Equals(ccId)))
+            {
+                return null;
+            }
+            var ce = new ChangeCoverCollectionEvent(ccId, changes, valeur);
+            CoverCollectionEvents.Add(ce);
+            return ce;
+        }
 
         public Agreement CreateAgreement(Dictionary<string, int> values)
         {
