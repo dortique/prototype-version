@@ -26,7 +26,9 @@ namespace ProtoVersion
 
         public CoverCollection Apply()
         {
-            return Engine.CoverCollections.Single(x => x.Id.Equals(CoverCollectionId)).Get(ValeurDate);
+            var cc = Engine.CoverCollections.Single(x => x.Id.Equals(CoverCollectionId)).Get(ValeurDate);
+            Engine.Post(cc.Id, cc.CalculatedValue, ValeurDate);
+            return cc;
         }
 
     }

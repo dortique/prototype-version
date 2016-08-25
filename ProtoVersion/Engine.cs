@@ -24,7 +24,10 @@ namespace ProtoVersion
         public static ICollection<Message> Messages { get; set; }
         public static ICollection<Post>  Posts { get; set; }
 
-
+        public static void Post(int ccId, int value, int valeur)
+        {
+            Posts.Add(new Post());
+        }
 
         public static string ClearAll()
         {
