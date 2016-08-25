@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProtoVersion
 {
@@ -11,18 +7,10 @@ namespace ProtoVersion
     {
         public int Id { get; set; }
         public int AgreementId { get; private set; }
-        public int Valeur { get; }
+        public int Valeur { get; private set; }
 
-
-        private Dictionary<string, int> _values;
-        public Dictionary<string, int> Values {
-            //get { return _values.Concat(Engine.Agreements.Single(x => x.Id.Equals(AgreementId)).Get(Valeur).Values.Where(x => !_values.Keys.Contains(x.Key)).ToDictionary(x => x.Key, y => y.Value);
-            //_values.Union(Engine.Agreements.Single(x => x.Id.Equals(AgreementId)).Get(Valeur).Values).ToDictionary(x => x.Key, y => y.Value); }
-            get { return Bogus(_values, Engine.Agreements.Single(x => x.Id.Equals(AgreementId)).Get(Valeur).Values); }
-            private set { _values = value; }
-        }
-
-        //public int A { get; set; }
+        public Dictionary<string, int> Values { get; }
+  
         public int CalculatedValue => Values.Sum(x => x.Value);
 
         public Dictionary<string, int> Bogus(Dictionary<string, int> a, Dictionary<string, int> b)
@@ -49,7 +37,7 @@ namespace ProtoVersion
         public CoverCollection Get(int valeur)
         {
             if (Valeur > valeur) return null;
-            
+
             var evts = Engine.CoverCollectionEvents.Where(x => x.CoverCollectionId.Equals(Id)).OrderBy(o => o.ValeurDate).ThenBy(t => t.RegisterDate);
 
             var values = new Dictionary<string,int>(Values);
@@ -73,16 +61,27 @@ namespace ProtoVersion
                 foreach (var change in evt.Changes)
                 {
 
-                    if (result._values.ContainsKey(change.Key))
+                    if (result.Values.ContainsKey(change.Key))
                     {
-                        result._values[change.Key] = change.Value;
+                        result.Values[change.Key] = change.Value;
                     }
                     else
                     {
-                        result._values.Add(change.Key, change.Value);
+                        result.Values.Add(change.Key, change.Value);
                     }
                 }
             }
+            var agr = Engine.Agreements.Single(x => x.Id.Equals(AgreementId)).Get(valeur);
+            if (agr.ValeurDate > result.Valeur) result.Valeur = agr.ValeurDate;
+            foreach (var val in agr.Values)
+            {
+                if (!result.Values.ContainsKey(val.Key))
+                {
+                    result.Values.Add(val.Key, val.Value);
+                }
+            }
+
+
             return result;
 
         }

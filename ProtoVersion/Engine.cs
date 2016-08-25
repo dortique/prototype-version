@@ -76,7 +76,7 @@ namespace ProtoVersion
 
             var cc = new CoverCollection(agr.Id, ccValues, valeur);
             Engine.CoverCollections.Add(cc);
-            return cc;
+            return cc.Get(valeur);
         }
 
         public ICollection<CoverCollection> GetCoverCollections(int valeur)
