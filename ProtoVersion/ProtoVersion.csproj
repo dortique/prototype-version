@@ -49,6 +49,7 @@
     <Compile Include="CoverCollection.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Message.cs" />
+    <Compile Include="Post.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

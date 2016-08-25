@@ -12,11 +12,11 @@ namespace ProtoVersion
         public int ValeurDate { get; set; }
         public DateTime RegisterDate { get; set; }
         public int CoverCollectionId { get; set; }
-        public int Key { get; set; }
-        public string Value { get; set; }
+        public string Key { get; set; }
+        public int Value { get; set; }
         public override string ToString() => $"{GetType().Name}({Id})[{CoverCollectionId}:key {Key}:val {Value}:valeur {ValeurDate}] (regdate = {RegisterDate})";
 
-        public ChangeCoverCollectionEvent(int coverCollectionId, int key, string value, int valeur, int id)
+        public ChangeCoverCollectionEvent(int coverCollectionId, string key, int value, int valeur, int id)
         {
             CoverCollectionId = coverCollectionId;
             Id = id;
@@ -26,9 +26,8 @@ namespace ProtoVersion
             RegisterDate = DateTime.Now;
         }
 
-        public string Apply()
+        public CoverCollection Apply()
         {
-//            Engine.Messages.Add(new Message { EventId = Id});
             return Engine.CoverCollections.Single(x => x.Id.Equals(CoverCollectionId)).Get(ValeurDate);
         }
 

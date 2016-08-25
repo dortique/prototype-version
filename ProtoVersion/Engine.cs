@@ -1,8 +1,10 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,6 +18,8 @@ namespace ProtoVersion
             Agreements = Agreements ?? new List<Agreement>();
             AgreementEvents = AgreementEvents ?? new List<ChangeAgreementEvent>();
             CoverCollections = CoverCollections ?? new List<CoverCollection>();
+            CoverCollectionEvents = CoverCollectionEvents ?? new List<ChangeCoverCollectionEvent>();
+            Posts = Posts ?? new List<Post>();
             
             Messages = Messages ?? new List<Message>();
         }
@@ -23,9 +27,9 @@ namespace ProtoVersion
         public static ICollection<Agreement> Agreements { get; set; }
         public static ICollection<ChangeAgreementEvent> AgreementEvents { get; set; } 
         public static ICollection<CoverCollection> CoverCollections { get; set; }
+        public static ICollection<ChangeCoverCollectionEvent> CoverCollectionEvents { get; set; } 
         public static ICollection<Message> Messages { get; set; }
-
-   
+        public static ICollection<Post>  Posts { get; set; }
 
 
 
@@ -33,24 +37,27 @@ namespace ProtoVersion
         {
             Agreements = new List<Agreement>();
             AgreementEvents = new List<ChangeAgreementEvent>();
+            CoverCollections = new List<CoverCollection>();
+            CoverCollectionEvents = new List<ChangeCoverCollectionEvent>();
             Messages = new List<Message>();
+            Posts = new List<Post>();
             return "Data purged";
         }
 
-        public ChangeAgreementEvent CreateChangeAgreementEvent(int agrId, int index, int value, int valeur)
+        public ChangeAgreementEvent CreateChangeAgreementEvent(int agrId, Dictionary<string, int> changes, int valeur)
         {
             if (!Agreements.Any(x => x.Id.Equals(agrId)))
             {
                 return null;
             }
-            var ce = new ChangeAgreementEvent(agrId, index , value, valeur);
+            var ce = new ChangeAgreementEvent(agrId, changes, valeur);
             AgreementEvents.Add(ce);
             return ce;
         }
 
 
 
-        public Agreement CreateAgreement(int[] values)
+        public Agreement CreateAgreement(Dictionary<string, int> values)
         {
             var a = new Agreement(values,0)
                 {
@@ -60,12 +67,20 @@ namespace ProtoVersion
             return a;
         }
 
-        public CoverCollection CreateCoverCollection(int agrId, int someValue, int valeur)
+        public CoverCollection CreateCoverCollection(int agrId, Dictionary<string, int> values , int valeur)
         {
             var agr = Engine.Agreements.Single(x => x.Id.Equals(agrId)).Get(valeur);
-            var cc = new CoverCollection(agr.Id, agr.Values, someValue, valeur);
+            var ccValues = values.Where(val => !agr.Values.ContainsKey(val.Key) || !agr.Values[val.Key].Equals(val.Value)).ToDictionary(val => val.Key, val => val.Value);
+
+            var cc = new CoverCollection(agr.Id, ccValues, valeur);
             Engine.CoverCollections.Add(cc);
             return cc;
+        }
+
+        public ICollection<CoverCollection> GetCoverCollections(int valeur)
+        {
+            var result = CoverCollections.Where(x => x.Get(valeur) != null);
+            return result.ToList();
         }
 
     }

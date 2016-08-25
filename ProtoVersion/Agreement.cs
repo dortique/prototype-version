@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ProtoVersion
@@ -7,41 +8,57 @@ namespace ProtoVersion
     {
 
         public int Id { get; set; }
-        public int[] Values { get; }
-        public Agreement(int[] values, int valeur)
+        public Dictionary<string, int> Values { get; }
+        public int ValeurDate { get; }
+
+
+        public Agreement(Dictionary<string,int> values, int valeur)
         {
             Values = values;
             ValeurDate = valeur;
         }
-        public int ValeurDate { get;  }
 
         public override string ToString()
         {
-            return $"A{Id} [{string.Join("] [", Values)}] (valeur:{ValeurDate})";
+            return $"A{Id} {string.Join("", Values)} (valeur:{ValeurDate})";
         }
 
         public Agreement Get(int valeur)
         {
             var evts = Engine.AgreementEvents.Where(x => x.AgreementId.Equals(Id)).OrderBy(o => o.ValeurDate).ThenBy(t => t.RegisterDate);
 
-            var values = new int[Values.Length];
-            Values.CopyTo(values, 0);
+            var values = new Dictionary<string, int>(Values);
+            var result = new Agreement(values, ValeurDate)
+            {
+                Id = Id
+            };
+
             foreach (var evt in evts)
             {
                 if (evt.ValeurDate > valeur)
                 {
                     break;
                 }
-                if (evt.Key >= values.Length)
+
+                result = new Agreement(values, evt.ValeurDate)
                 {
-                    Array.Resize(ref values, evt.Key + 1);
+                    Id = Id
+                };
+
+                foreach (var change in evt.Changes)
+                {
+
+                    if (result.Values.ContainsKey(change.Key))
+                    {
+                        result.Values[change.Key] = change.Value;
+                    }
+                    else
+                    {
+                        result.Values.Add(change.Key, change.Value);
+                    }
                 }
-                values[evt.Key] = evt.Value;
             }
-            return new Agreement(values, valeur)
-            {
-                Id = Id,
-            };
+            return result;
 
         }
     }
