@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.CodeDom;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ProtoVersion
@@ -13,20 +15,28 @@ namespace ProtoVersion
             CoverCollections = CoverCollections ?? new List<CoverCollection>();
             CoverCollectionEvents = CoverCollectionEvents ?? new List<ChangeCoverCollectionEvent>();
             Posts = Posts ?? new List<Post>();
-            
+
             Messages = Messages ?? new List<Message>();
         }
         public static int Time { get; set; }
-        public static ICollection<Agreement> Agreements { get; set; }
-        public static ICollection<ChangeAgreementEvent> AgreementEvents { get; set; } 
-        public static ICollection<CoverCollection> CoverCollections { get; set; }
-        public static ICollection<ChangeCoverCollectionEvent> CoverCollectionEvents { get; set; } 
+        private static ICollection<Agreement> Agreements { get; set; }
+        public static ICollection<ChangeAgreementEvent> AgreementEvents { get; set; }
+        private static ICollection<CoverCollection> CoverCollections { get; set; }
+        public static ICollection<ChangeCoverCollectionEvent> CoverCollectionEvents { get; set; }
         public static ICollection<Message> Messages { get; set; }
-        public static ICollection<Post>  Posts { get; set; }
+        public static ICollection<Post> Posts { get; set; }
+        public static int AgreementCount => Agreements.Count;
+        public static int CoverCollectionCount => CoverCollections.Count;
 
-        public static void Post(int ccId, int value, int valeur)
+
+        public static Agreement GetAgreement(int id, int valeur)
         {
-            Posts.Add(new Post());
+            return Agreements.SingleOrDefault(x => x.Id.Equals(id))?.Get(valeur);
+        }
+
+        public static CoverCollection GetCoverCollection(int id, int valeur)
+        {
+            return CoverCollections.SingleOrDefault(x => x.Id.Equals(id))?.Get(valeur);
         }
 
         public static string ClearAll()
@@ -64,17 +74,17 @@ namespace ProtoVersion
 
         public Agreement CreateAgreement(Dictionary<string, int> values)
         {
-            var a = new Agreement(values,0)
-                {
-                    Id = Agreements.Count + 1
-                };
+            var a = new Agreement(values, 0)
+            {
+                Id = Agreements.Count + 1
+            };
             Agreements.Add(a);
             return a;
         }
 
-        public CoverCollection CreateCoverCollection(int agrId, Dictionary<string, int> values , int valeur)
+        public CoverCollection CreateCoverCollection(int agrId, Dictionary<string, int> values, int valeur)
         {
-            var agr = Engine.Agreements.Single(x => x.Id.Equals(agrId)).Get(valeur);
+            var agr = Engine.GetAgreement(agrId, valeur);
             var ccValues = values.Where(val => !agr.Values.ContainsKey(val.Key) || !agr.Values[val.Key].Equals(val.Value)).ToDictionary(val => val.Key, val => val.Value);
 
             var cc = new CoverCollection(agr.Id, ccValues, valeur);
@@ -87,6 +97,30 @@ namespace ProtoVersion
             var result = CoverCollections.Where(x => x.Get(valeur) != null);
             return result.ToList();
         }
+
+        public static void DoCalculations(int id, int startValeur)
+        {
+            var end = Posts.Any(x => x.CoverCollectionId.Equals(id)) ? Posts.Where(x => x.CoverCollectionId.Equals(id)).Max(y => y.Valeur) : Engine.Time;
+            DoCalculations(id, startValeur, end);
+        }
+
+        public static void DoCalculations(int id, int startValeur, int endValeur)
+        {
+            if (endValeur <= startValeur) return;
+
+            var vt = startValeur < 10 ? 10 : startValeur;
+            while (vt <= endValeur)
+            {
+                var cc = GetCoverCollection(id, vt - 10);
+                var previous = Posts.Where(x => x.CoverCollectionId.Equals(id) && x.Valeur.Equals(vt)).OrderByDescending(o => o.Id).FirstOrDefault();
+                if (previous != null)
+                    Posts.Add(new Post(cc.Id, previous.Value*-1, vt));
+                Posts.Add(new Post(cc.Id, cc.CalculatedValue, vt));
+                vt = vt + 10;
+            }
+
+        }
+
 
     }
 }

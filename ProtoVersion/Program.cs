@@ -11,8 +11,9 @@ namespace ProtoVersion
         static void Main(string[] args)
         {
             var engine = new Engine();
-            Console.WindowWidth = 200;
-            Console.WindowHeight = 75;
+            Console.WindowWidth = Console.LargestWindowWidth - (Console.LargestWindowWidth/10);
+            Console.WindowHeight = Console.LargestWindowHeight - (Console.LargestWindowHeight / 10);
+
             if (args.Length > 0)
                 RunConsoleApp();
             else
@@ -83,7 +84,7 @@ namespace ProtoVersion
             WriteMaybe();
 
             //a?: (x,y) = (2,3) valuer=20
-            agr = Engine.Agreements.First().Get(20);
+            agr = Engine.GetAgreement(1,20);
             WriteMaybe($"Agreement: {agr}");
             if (agr.Values["x"] != 2 || agr.Values["y"] != 3) FailAndExitOnKey("FAIL!");
             WriteMaybe();
@@ -97,28 +98,28 @@ namespace ProtoVersion
             if (CheckAgreement(agr, 6, 3, 30)) FailAndExitOnKey("FAIL!");
             WriteMaybe();
 
-            agr = Engine.Agreements.First().Get(15);
+            agr = Engine.GetAgreement(1, 15);
             WriteMaybe($"Agrement.Get(15): {agr}");
             if (CheckAgreement(agr, 1, 8, 10)) FailAndExitOnKey("FAIL!");
-            agr = Engine.Agreements.First().Get(10);
+            agr = Engine.GetAgreement(1, 10);
             WriteMaybe($"Agrement.Get(10): {agr}");
             if (CheckAgreement(agr, 1, 8, 10)) FailAndExitOnKey("FAIL!");
-            agr = Engine.Agreements.First().Get(5);
+            agr = Engine.GetAgreement(1, 5);
             WriteMaybe($"Agrement.Get(5): {agr}");
             if (CheckAgreement(agr, 1, 2, 0)) FailAndExitOnKey("FAIL!");
             WriteMaybe();
-            cc = Engine.CoverCollections.First().Get(0);
+            cc = Engine.GetCoverCollection(1,0);
             WriteMaybe($"CoverCollections[0].Get(0): {cc}");
             if (!CheckCoverCollection(cc, 1, 2, 12, 0)) FailAndExitOnKey("FAIL!");
 
             var ccevt = engine.CreateChangeCoverCollectionEvent(1, new Dictionary<string, int> {{"x", 19}}, 5);
             WriteMaybe($"CoverCollection changed: {ccevt}");
-            cc = Engine.CoverCollections.First().Get(5);
+            cc = Engine.GetCoverCollection(1, 5);
             WriteMaybe($"CoverCollections[0].Get(5): {cc}");
             if (!CheckCoverCollection(cc, 19, 2, 12, 5)) FailAndExitOnKey("FAIL!");
             WriteMaybe();
 
-            cc = Engine.CoverCollections.First().Get(10);
+            cc = Engine.GetCoverCollection(1, 10);
             WriteMaybe($"CoverCollections[0].Get(10): {cc}");
             if (!CheckCoverCollection(cc, 19, 8, 12, 10)) FailAndExitOnKey("FAIL!");
             WriteMaybe();
@@ -230,28 +231,29 @@ namespace ProtoVersion
         }
         public static string DisplayCoverCollections(string[] cmd)
         {
-            if (Engine.CoverCollections.Any())
+            if (Engine.CoverCollectionCount > 0)
             {
                 if (cmd.Length > 1)
                 {
                     var valeur = cmd.Length > 2 ? int.Parse(cmd[2]) : Engine.Time;
-                    return Engine.CoverCollections.Single(x => x.Id.Equals(int.Parse(cmd[1]))).ToString();
+                    return Engine.GetCoverCollection(int.Parse(cmd[1]), valeur).ToString();
                 }
-                return string.Join(Environment.NewLine, Engine.CoverCollections);
+                //return string.Join(Environment.NewLine, Engine.CoverCollections);
             }
             return "no covercollections in system";
         }
 
         public static string DisplayAgreements(string[] cmd)
         {
-            if (Engine.Agreements.Any())
+            if (Engine.AgreementCount > 0)
             {
                 if (cmd.Length > 1)
                 {
                     var valeur = cmd.Length > 2 ? int.Parse(cmd[2]) : Engine.Time;
-                    return Engine.Agreements.Single(x => x.Id.Equals(int.Parse(cmd[1]))).Get(valeur).ToString();
+                    return Engine.GetAgreement(int.Parse(cmd[1]),valeur).ToString();
                 }
-                return string.Join(Environment.NewLine, Engine.Agreements);
+                //return string.Join(Environment.NewLine, Engine.Agreements);
+                return "not implemented";
             }
             return "no agreements in system";
         }

@@ -25,7 +25,7 @@ namespace ProtoVersion
             Values = values;
             AgreementId = agreementId;
             Valeur = valeur;
-            Id = Engine.CoverCollections.Count + 1;
+            Id = Engine.CoverCollectionCount + 1;
             //Engine.Posts.Add(new Post(A*Values[0], Valeur));
         }
 
@@ -71,7 +71,7 @@ namespace ProtoVersion
                     }
                 }
             }
-            var agr = Engine.Agreements.Single(x => x.Id.Equals(AgreementId)).Get(valeur);
+            var agr = Engine.GetAgreement(AgreementId,valeur);
             if (agr.ValeurDate > result.Valeur) result.Valeur = agr.ValeurDate;
             foreach (var val in agr.Values)
             {

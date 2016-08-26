@@ -27,7 +27,7 @@ namespace ProtoVersion
         public Agreement Apply()
         {
             Engine.Messages.Add(new Message(Id));
-            return Engine.Agreements.Single(x => x.Id.Equals(AgreementId)).Get(ValeurDate);
+            return Engine.GetAgreement(AgreementId,ValeurDate);
         }
 
     }
