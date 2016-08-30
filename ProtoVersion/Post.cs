@@ -13,9 +13,9 @@ namespace ProtoVersion
         public int CoverCollectionId { get; set; }
         public int Valeur { get; set; }
         public DateTime Stamp { get; set; }
-        public int Value { get; set; }
+        public decimal Value { get; set; }
 
-        public Post(int id, int value, int valeur)
+        public Post(int id, decimal value, int valeur)
         {
             CoverCollectionId = id;
             Value = value;

@@ -118,6 +118,24 @@ namespace ProtoTest
 
 
         [TestMethod]
+        public void TestChangeAgreementMultipleValuesOneByOne()
+        {
+            //x -> 2 -> 7 -> 9
+            engine.CreateAgreement(new Dictionary<string, int> { { "x", 2 }, { "y", 3 } });
+            engine.CreateChangeAgreementEvent(1, new Dictionary<string, int> { { "x", 7 }}, 10).Apply();
+            engine.CreateChangeAgreementEvent(1, new Dictionary<string, int> { { "y", 9 } }, 20).Apply();
+
+            var agr = Engine.GetAgreement(1, 10);
+            Assert.AreEqual(7, agr.Values["x"]);
+            Assert.AreEqual(3, agr.Values["y"]);
+
+            agr = Engine.GetAgreement(1, 20);
+            Assert.AreEqual(7, agr.Values["x"]);
+            Assert.AreEqual(9, agr.Values["y"]);
+
+        }
+
+        [TestMethod]
         public void TestChangeAgreementWithCollections()
         {
             engine.CreateAgreement(new Dictionary<string, int> { { "x", 1 }, { "y", 2 } });
