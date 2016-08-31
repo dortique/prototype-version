@@ -68,7 +68,6 @@ namespace ProtoTest
 
         }
 
-
         [TestMethod]
         public void TestGetAllWithAgreementChanges()
         {
@@ -76,10 +75,38 @@ namespace ProtoTest
             engine.CreateAgreement(new Dictionary<string, int> { { "x", 0 } });
             engine.CreateCoverCollection(1, new Dictionary<string, int> { { "a", 5 } }, 0);
             engine.CreateChangeAgreementEvent(1, new Dictionary<string, int> { { "x", 1 } }, 5);
+            engine.CreateChangeAgreementEvent(1, new Dictionary<string, int> { { "x", 2 } }, 10);
 
-            Assert.AreEqual(2, Engine.GetCoverCollections(1, 0, 40).Count);
+            var ccs = Engine.GetCoverCollections(1, 0, 40);
+            Assert.AreEqual(3, ccs.Count);
+            Assert.AreEqual(Engine.GetCoverCollection(1, 0), ccs.SingleOrDefault(x => x.Valeur.Equals(0)));
+            Assert.AreEqual(Engine.GetCoverCollection(1, 5), ccs.SingleOrDefault(x => x.Valeur.Equals(5)));
+            Assert.AreEqual(Engine.GetCoverCollection(1, 10), ccs.SingleOrDefault(x => x.Valeur.Equals(10)));
 
         }
+
+        [TestMethod]
+        public void TestGetAllWithChangesOfBothKind()
+        {
+            var engine = new Engine();
+            engine.CreateAgreement(new Dictionary<string, int> { { "x", 0 }, { "y", 1 } });
+            engine.CreateCoverCollection(1, new Dictionary<string, int> { { "a", 5 } }, 0);
+
+            engine.CreateChangeCoverCollectionEvent(1, new Dictionary<string, int> { { "x", 5 }, { "a", 2 } }, 10);
+            engine.CreateChangeAgreementEvent(1, new Dictionary<string, int> { { "x", 1 }, { "y", 2 } }, 15);
+            engine.CreateChangeCoverCollectionEvent(1, new Dictionary<string, int> { { "x", 6 } }, 15);
+            engine.CreateChangeAgreementEvent(1, new Dictionary<string, int> { { "y", 8 } }, 20);
+            engine.CreateChangeCoverCollectionEvent(1, new Dictionary<string, int> { { "a", 4 } }, 0);
+            engine.CreateChangeCoverCollectionEvent(1, new Dictionary<string, int> { { "x", 9 } }, 15);
+
+            var ccs = Engine.GetCoverCollections(1, 0, 40);
+            Assert.AreEqual(4, ccs.Count);
+            Assert.AreEqual(Engine.GetCoverCollection(1, 0), ccs.SingleOrDefault(x => x.Valeur.Equals(0)));
+            Assert.AreEqual(Engine.GetCoverCollection(1, 10), ccs.SingleOrDefault(x => x.Valeur.Equals(10)));
+            Assert.AreEqual(Engine.GetCoverCollection(1, 15), ccs.Last(x => x.Valeur.Equals(15)));
+            Assert.AreEqual(Engine.GetCoverCollection(1, 20), ccs.SingleOrDefault(x => x.Valeur.Equals(20)));
+        }
+
 
         [TestMethod]
         public void TestValuesGetAll()
