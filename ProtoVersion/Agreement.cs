@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ProtoVersion
 {
-    public class Agreement
+    public class Agreement : IHaveValeur
     {
 
         public int Id { get; set; }
@@ -107,5 +107,9 @@ namespace ProtoVersion
             return result;
         }
 
+        public int GetValeur()
+        {
+            return ValeurDate;
+        }
     }
 }

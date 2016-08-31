@@ -21,25 +21,6 @@ namespace ProtoTest
         }
 
 
-        [TestMethod]
-        public void TestGetAllWithCoverCollectionChanges()
-        {
-            var engine = new Engine();
-            engine.CreateAgreement(new Dictionary<string, int> { { "x", 2 } });
-            engine.CreateCoverCollection(1, new Dictionary<string, int> { { "a", 5 } }, 0);
-            engine.CreateChangeCoverCollectionEvent(1, new Dictionary<string, int> { { "a", 7 } }, 20);
-            engine.CreateChangeCoverCollectionEvent(1, new Dictionary<string, int> { { "a", 9 } }, 35);
-
-            Assert.AreEqual(3, Engine.GetCoverCollections(1, 0, 40).Count);
-            Assert.AreEqual(1, Engine.GetCoverCollections(1, 0, 10).Count);
-            Assert.AreEqual(1, Engine.GetCoverCollections(1, 10, 20).Count);
-            Assert.AreEqual(2, Engine.GetCoverCollections(1, 30, 40).Count);
-            Assert.AreEqual(1, Engine.GetCoverCollections(1, 30, 35).Count);
-            Assert.AreEqual(2, Engine.GetCoverCollections(1, 30, 36).Count);
-            Assert.AreEqual(3, Engine.GetCoverCollections(1, 10, 40).Count);
-            Assert.AreEqual(2, Engine.GetCoverCollections(1, 20, 40).Count);
-
-        }
 
         [TestMethod]
         public void TestGetAllAgreements()
@@ -55,16 +36,16 @@ namespace ProtoTest
             var a0T40 = Engine.GetAgreements(1, 0, 40);
 
             Assert.AreEqual(1, a0T5?.Count);
-            Assert.AreEqual(3, a0T10?.Count);
-            Assert.AreEqual(4, a0T40?.Count);
+            Assert.AreEqual(2, a0T10?.Count);
+            Assert.AreEqual(3, a0T40?.Count);
 
             var a0 = Engine.GetAgreement(1, 0);
             var a5 = Engine.GetAgreement(1, 5);
             var a10 = Engine.GetAgreement(1, 10);
 
-            Assert.AreEqual(a0, a0T5?.Single(x => x.ValeurDate.Equals(0)));
-            Assert.AreEqual(a5, a0T10?.Last(x => x.ValeurDate.Equals(5)));
-            Assert.AreEqual(a10, a0T40?.Single(x => x.ValeurDate.Equals(10)));
+            Assert.AreEqual(a0, a0T5?.SingleOrDefault(x => x.ValeurDate.Equals(0)));
+            Assert.AreEqual(a5, a0T10?.SingleOrDefault(x => x.ValeurDate.Equals(5)));
+            Assert.AreEqual(a10, a0T40?.SingleOrDefault(x => x.ValeurDate.Equals(10)));
 
         }
 

@@ -138,20 +138,37 @@ namespace ProtoVersion
         public ICollection<CoverCollection> GetBranch(int valeur1, int valeur2, DateTime realTime)
         {
             var result = new List<CoverCollection>();
-            var allEvents = new List<BaseEvent>();
-            var ccEvents = Engine.CoverCollectionEvents.Where(x => x.CoverCollectionId.Equals(Id) && x.ValeurDate >= valeur1 && x.ValeurDate < valeur2 && x.RegisterDate < realTime);
-            allEvents.AddRange(ccEvents);
-            var aEvents = Engine.AgreementEvents.Where(x => x.AgreementId.Equals(AgreementId) && x.ValeurDate >= valeur1 && x.ValeurDate < valeur2 && x.RegisterDate < realTime);
-            allEvents.AddRange(aEvents);
+            var ccEvents = Engine.CoverCollectionEvents.Where(x => x.CoverCollectionId.Equals(Id) &&/* x.ValeurDate >= valeur1 &&*/ x.ValeurDate < valeur2 && x.RegisterDate < realTime);
+            var all = new List<IHaveValeur>(ccEvents);
+            var agrs = Engine.GetAgreementBranch(AgreementId, 0, valeur2, realTime);
+            all.AddRange(agrs.Skip(1));
 
-            var cc = Get(valeur1 - 1 < 0 ? 0 : valeur1 - 1);
-            result.Add(cc);
-            foreach (var e in allEvents.OrderBy(o => o.ValeurDate).ThenBy(t => t.RegisterDate)) 
+            var ccOnly = this;
+            var ccMerged = this.Clone();
+            var agreement = agrs.First();
+            MergeValues(agreement, ccMerged);
+            result.Add(ccMerged);
+            foreach (var e in all.OrderBy(o => o.GetValeur())) //todo: should do thenby(registertime)
             {
-                cc = ApplyChange(cc, e);
-                result.Add(cc);
+                if (e is ChangeCoverCollectionEvent)
+                {
+                    ccOnly = ApplyChange(ccOnly, (ChangeCoverCollectionEvent) e);
+                }
+                else //assume Agreement "version"
+                {
+                    agreement = (Agreement) e;
+                }
+                ccMerged = ccOnly.Clone();
+                MergeValues(agreement, ccMerged);
+                ccMerged.Valeur = e.GetValeur();
+                result.Add(ccMerged);
+
             }
-            return result;
+            return result.Where(x => x.Valeur >= valeur1).ToList();
         }
+
+
+
+
     }
 }
