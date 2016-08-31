@@ -45,6 +45,12 @@ namespace ProtoVersion
             return Agreements.SingleOrDefault(x => x.Id.Equals(id))?.Get(vt1, vt2);
         }
 
+        public static ICollection<Agreement> GetAgreementBranch(int id, int vt1, int vt2, DateTime realTime)
+        {
+            return Agreements.SingleOrDefault(x => x.Id.Equals(id)).GetBranch(vt1, vt2, realTime);
+        } 
+
+
         public static CoverCollection GetCoverCollection(int id, int valeur)
         {
             return CoverCollections.SingleOrDefault(x => x.Id.Equals(id))?.Get(valeur);
@@ -54,6 +60,10 @@ namespace ProtoVersion
             return CoverCollections.SingleOrDefault(x => x.Id.Equals(id))?.Get(vt1, vt2);
         }
 
+        public static ICollection<CoverCollection> GetCoverCollectionBranch(int id, int valeur1, int valeur2, DateTime realTime)
+        {
+            return CoverCollections.SingleOrDefault(x => x.Id.Equals(id))?.GetBranch(valeur1, valeur2, realTime);
+        }
         public static string ClearAll()
         {
             Agreements = new List<Agreement>();
@@ -176,5 +186,6 @@ namespace ProtoVersion
         {
             return (int)Math.Ceiling((x+1) / 10.0) * 10;
         }
+
     }
 }

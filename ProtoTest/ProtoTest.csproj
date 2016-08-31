@@ -55,8 +55,9 @@
     <Compile Include="PostTest.cs" />
     <Compile Include="ProtoUnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestGetBranchesInTime.cs" />
     <Compile Include="TestGetVersions.cs" />
-    <Compile Include="VariousTest.cs" />
+    <Compile Include="ApplyChangesTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProtoVersion\ProtoVersion.csproj">

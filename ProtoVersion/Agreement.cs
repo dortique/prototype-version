@@ -72,6 +72,21 @@ namespace ProtoVersion
             var agr = Get(valeur1);
             result.Add(agr);
 
+            var eventDates = Engine.AgreementEvents.Where(x => x.AgreementId.Equals(Id) && x.ValeurDate > valeur1 && x.ValeurDate < valeur2).Select(y => y.ValeurDate);
+            foreach (var date in eventDates.Distinct().OrderBy(o => o))
+            {
+                agr = Get(date);
+                result.Add(agr);
+            }
+
+            return result;
+        }
+        public ICollection<Agreement> GetBranch(int valeur1, int valeur2, DateTime realTime)
+        {
+            var result = new List<Agreement>();
+            var agr = Get(valeur1);
+            result.Add(agr);
+
             var events = Engine.AgreementEvents.Where(x => x.AgreementId.Equals(Id) && x.ValeurDate > valeur1 && x.ValeurDate < valeur2).OrderBy(o => o.ValeurDate).ThenBy(t => t.RegisterDate);
             foreach (var evt in events)
             {
@@ -91,5 +106,6 @@ namespace ProtoVersion
             result = result && !a.Values.Except(Values).Any();
             return result;
         }
+
     }
 }

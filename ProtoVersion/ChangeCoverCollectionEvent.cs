@@ -6,13 +6,9 @@ using System.Threading.Tasks;
 
 namespace ProtoVersion
 {
-    public class ChangeCoverCollectionEvent
+    public class ChangeCoverCollectionEvent : BaseEvent
     {
-        public int Id;
-        public int ValeurDate { get; set; }
-        public DateTime RegisterDate { get; set; }
         public int CoverCollectionId { get; set; }
-        public Dictionary<string, int> Changes { get; set; }
         public override string ToString() => $"{GetType().Name}({Id})[{CoverCollectionId}]{string.Join(",", Changes.Select(x => $"({x.Key} => {x.Value})"))}(valeur = {ValeurDate}) (regdate = {RegisterDate})";
 
         public ChangeCoverCollectionEvent(int coverCollectionId, Dictionary<string, int> changes, int valeur)

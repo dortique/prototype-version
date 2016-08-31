@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 
@@ -48,25 +49,7 @@ namespace ProtoVersion
             foreach (var valeur in allDates.Distinct().OrderBy(o => o))
             {
                 cc = Get(valeur);
-                //if (stuff is Agreement)
-                //{
-                //    cc = Get(((Agreement)stuff).ValeurDate);
-                //}
-                //else if (stuff is ChangeCoverCollectionEvent)
-                //{
-                //    cc = Get()
-                //    cc = ApplyChange(cc, stuff as ChangeCoverCollectionEvent);
-                //    var agr = Engine.GetAgreement(cc.AgreementId, cc.Valeur);
-                //    MergeValues(agr, cc);
-                //}
-                //else
-                //{
-                //    continue;
-                //}
-                //if (!result.Contains(cc))
-                //{
-                    result.Add(cc);
-                //}
+                result.Add(cc);
             }
 
             return result;
@@ -116,7 +99,7 @@ namespace ProtoVersion
             }
         }
 
-        private CoverCollection ApplyChange(CoverCollection result, ChangeCoverCollectionEvent evt)
+        private CoverCollection ApplyChange(CoverCollection result, BaseEvent evt)
         {
 
             var cc = new CoverCollection(AgreementId, new Dictionary<string, int>(result.Values), evt.ValeurDate)
@@ -128,7 +111,10 @@ namespace ProtoVersion
             {
                 if (cc.Values.ContainsKey(change.Key))
                 {
-                    cc.Values[change.Key] = change.Value;
+                    if (evt is ChangeCoverCollectionEvent)
+                    {
+                        cc.Values[change.Key] = change.Value;
+                    }
                 }
                 else
                 {
@@ -141,12 +127,31 @@ namespace ProtoVersion
         public override bool Equals(object obj)
         {
             var result = obj != null && obj.GetType() == GetType();
+            if (!result) return false;
             var cc = (CoverCollection)obj;
-            result = result && cc.AgreementId.Equals(AgreementId) && cc.Id.Equals(Id) && cc.Valeur.Equals(Valeur) &&
+            result = cc.AgreementId.Equals(AgreementId) && cc.Id.Equals(Id) && cc.Valeur.Equals(Valeur) &&
                      cc.CalculatedValue.Equals(CalculatedValue) && cc.Values.Count.Equals(Values.Count);
             result = result && !cc.Values.Except(Values).Any();
             return result;
         }
 
+        public ICollection<CoverCollection> GetBranch(int valeur1, int valeur2, DateTime realTime)
+        {
+            var result = new List<CoverCollection>();
+            var allEvents = new List<BaseEvent>();
+            var ccEvents = Engine.CoverCollectionEvents.Where(x => x.CoverCollectionId.Equals(Id) && x.ValeurDate >= valeur1 && x.ValeurDate < valeur2 && x.RegisterDate < realTime);
+            allEvents.AddRange(ccEvents);
+            var aEvents = Engine.AgreementEvents.Where(x => x.AgreementId.Equals(AgreementId) && x.ValeurDate >= valeur1 && x.ValeurDate < valeur2 && x.RegisterDate < realTime);
+            allEvents.AddRange(aEvents);
+
+            var cc = Get(valeur1 - 1 < 0 ? 0 : valeur1 - 1);
+            result.Add(cc);
+            foreach (var e in allEvents.OrderBy(o => o.ValeurDate).ThenBy(t => t.RegisterDate)) 
+            {
+                cc = ApplyChange(cc, e);
+                result.Add(cc);
+            }
+            return result;
+        }
     }
 }

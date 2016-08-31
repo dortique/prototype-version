@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Agreement.cs" />
+    <Compile Include="BaseEvent.cs" />
     <Compile Include="ChangeCoverCollectionEvent.cs" />
     <Compile Include="ChangeAgreementEvent.cs" />
     <Compile Include="CoverCollection.cs" />
